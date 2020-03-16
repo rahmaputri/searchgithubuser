@@ -2,7 +2,10 @@ package com.rahmawatiputrianasari.searchgithubuser.ui.main
 
 import com.rahmawatiputrianasari.searchgithubuser.app.model.Joke
 
-class MainPresenter(private val router: MainContract.Router, private val interactor: MainInteractor) :
+class MainPresenter(
+    private val router: MainContract.Router,
+    private val interactor: MainInteractor
+) :
     MainContract.Presenter {
 
     private var view: MainContract.View? = null
@@ -22,6 +25,14 @@ class MainPresenter(private val router: MainContract.Router, private val interac
             view?.hideLoading()
             view?.publishData(it)
         }, this::onError)
+    }
+
+    override fun searchUser(username: String, page: String) {
+        view?.showLoading()
+        interactor.getUsers({
+            view?.hideLoading()
+            view?.publishUsers(it)
+        }, this::onError, username, page)
     }
 
     override fun onItemClicked(joke: Joke) {

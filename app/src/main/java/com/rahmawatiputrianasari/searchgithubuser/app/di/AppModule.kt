@@ -12,7 +12,7 @@ import javax.inject.Singleton
 class AppModule {
 
     companion object {
-        private const val SERVER_URL = "https://umorili.herokuapp.com"
+        private const val SERVER_URL = "https://api.github.com/"
     }
 
     @Provides

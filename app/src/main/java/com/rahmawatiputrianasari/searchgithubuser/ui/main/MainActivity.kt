@@ -11,7 +11,9 @@ import android.widget.Toast
 import com.rahmawatiputrianasari.searchgithubuser.R
 import com.rahmawatiputrianasari.searchgithubuser.app.App
 import com.rahmawatiputrianasari.searchgithubuser.app.model.Joke
+import com.rahmawatiputrianasari.searchgithubuser.app.model.SearchResponse
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.adapter.MainAdapter
+import com.rahmawatiputrianasari.searchgithubuser.ui.main.adapter.MainAdapter2
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.DaggerMainComponent
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.MainComponent
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.MainModule
@@ -31,6 +33,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     @Inject
     lateinit var presenter: MainPresenter
+//    @Inject
+//    lateinit var username: String
+//    @Inject
+//    lateinit var page: String
 
     val component: MainComponent by lazy {
         DaggerMainComponent.builder()
@@ -47,7 +53,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         initView()
         component.inject(this)
         presenter.bindView(this)
-        presenter.onViewCreated()
+//        presenter.onViewCreated()
+        presenter.searchUser("rahmaputri","1")
     }
 
     override fun onDestroy() {
@@ -72,6 +79,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
         })
         recyclerView.adapter = adapter
+    }
+
+    override fun publishUsers(data: SearchResponse) {
+//        print("datsa")
+
+        val adapter = MainAdapter2(data.items!!, object : MainAdapter2.JokeListener {
+            override fun onItemClick(joke: Joke) {
+//                presenter.onItemClicked(joke)
+            }
+        })
+        recyclerView.adapter = adapter
+
     }
 
     override fun showMessage(msg: String) {

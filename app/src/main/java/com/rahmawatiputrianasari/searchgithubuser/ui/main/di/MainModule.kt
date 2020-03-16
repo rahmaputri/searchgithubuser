@@ -19,16 +19,17 @@ class MainModule {
     @ActivityScope
     fun repository(api: MainApi) = MainRepo(api)
 
-
     @Provides
     @ActivityScope
     fun router(activity: MainActivity): MainContract.Router = MainRouter(activity)
 
     @Provides
     @ActivityScope
-    fun presenter(router: MainContract.Router, interactor: MainInteractor) = MainPresenter(router, interactor)
+    fun presenter(router: MainContract.Router, interactor: MainInteractor) =
+        MainPresenter(router, interactor)
 
     @Provides
     @ActivityScope
-    fun interactor(repository: MainRepo) = MainInteractor(repository)
+    fun interactor(repository: MainRepo) =
+        MainInteractor(repository)
 }
