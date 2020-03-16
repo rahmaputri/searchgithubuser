@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.item.view.*
 import java.net.URL
 
 
-class MainAdapter2(private val items: List<Item>, private val listener: JokeListener) :
+class MainAdapter2(private var items: List<Item>, private val listener: JokeListener) :
     RecyclerView.Adapter<MainAdapter2.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

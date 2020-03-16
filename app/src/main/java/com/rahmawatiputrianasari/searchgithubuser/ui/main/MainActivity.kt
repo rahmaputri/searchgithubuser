@@ -3,10 +3,11 @@ package com.rahmawatiputrianasari.searchgithubuser.ui.main
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.view.View
+import android.support.v7.widget.RecyclerView
+import android.util.Log
+import android.widget.Adapter
 import android.widget.Toast
 import com.rahmawatiputrianasari.searchgithubuser.R
 import com.rahmawatiputrianasari.searchgithubuser.app.App
@@ -18,7 +19,6 @@ import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.DaggerMainComponent
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.MainComponent
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.MainModule
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.toolbar.*
 import javax.inject.Inject
 
 
@@ -33,10 +33,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     @Inject
     lateinit var presenter: MainPresenter
-//    @Inject
-//    lateinit var username: String
-//    @Inject
-//    lateinit var page: String
+
+    var page: Int = 1
+    private var loading = true
+
+    private lateinit var mLayoutManager: LinearLayoutManager
+    private lateinit var mAdapter: MainAdapter2
+    var created = true
 
     val component: MainComponent by lazy {
         DaggerMainComponent.builder()
@@ -54,7 +57,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         component.inject(this)
         presenter.bindView(this)
 //        presenter.onViewCreated()
-        presenter.searchUser("rahmaputri","1")
+        presenter.searchUser("r", page.toString())
+
     }
 
     override fun onDestroy() {
@@ -63,13 +67,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun showLoading() {
-        recyclerView.visibility = View.GONE
-        progressBar.visibility = View.VISIBLE
+//        recyclerView.visibility = View.GONE
+//        progressBar.visibility = View.VISIBLE
+        loading = true
     }
 
     override fun hideLoading() {
-        recyclerView.visibility = View.VISIBLE
-        progressBar.visibility = View.GONE
+//        recyclerView.visibility = View.VISIBLE
+//        progressBar.visibility = View.GONE
+        loading = false
     }
 
     override fun publishData(data: List<Joke>) {
@@ -78,19 +84,38 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 presenter.onItemClicked(joke)
             }
         })
-        recyclerView.adapter = adapter
+        recyclerView.adapter = mAdapter
     }
 
+
     override fun publishUsers(data: SearchResponse) {
-//        print("datsa")
-
-        val adapter = MainAdapter2(data.items!!, object : MainAdapter2.JokeListener {
-            override fun onItemClick(joke: Joke) {
+        if (created) {
+            mAdapter = MainAdapter2(data.items!!, object : MainAdapter2.JokeListener {
+                override fun onItemClick(joke: Joke) {
 //                presenter.onItemClicked(joke)
-            }
-        })
-        recyclerView.adapter = adapter
+                }
+            })
+            Log.v("...", "total jumlah " + data.totalCount)
 
+
+            recyclerView.setLayoutManager(mLayoutManager)
+            recyclerView.addOnScrollListener(scrollData()!!)
+
+            recyclerView.adapter = mAdapter
+        }else{
+            mAdapter.notifyDataSetChanged()
+        }
+
+    }
+
+
+    private fun scrollData(): EndlessOnScrollListener? {
+        return object : EndlessOnScrollListener() {
+            override fun onLoadMore() {
+                page = page + 1
+                presenter.searchUser("r", page.toString())
+            }
+        }
     }
 
     override fun showMessage(msg: String) {
@@ -99,9 +124,39 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun initView() {
         val manager = LinearLayoutManager(this).apply { orientation = LinearLayoutManager.VERTICAL }
+        mLayoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager = manager
-        toolbar.setTitle(R.string.main_title)
-        toolbar.setTitleTextColor(ContextCompat.getColor(this, android.R.color.white))
-        toolbar.setNavigationOnClickListener { presenter.onBackClicked() }
+//        toolbar.setTitle(R.string.main_title)
+//        toolbar.setTitleTextColor(ContextCompat.getColor(this, android.R.color.white))
+//        toolbar.setNavigationOnClickListener { presenter.onBackClicked() }
     }
+
+
+}
+
+abstract class EndlessOnScrollListener : RecyclerView.OnScrollListener() {
+    private var mPreviousTotal = 0
+    private var mLoading = true
+    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        super.onScrolled(recyclerView, dx, dy)
+        val visibleItemCount = recyclerView.childCount
+        val totalItemCount = recyclerView.layoutManager!!.itemCount
+        val firstVisibleItem =
+            (recyclerView.layoutManager as LinearLayoutManager?)!!.findFirstVisibleItemPosition()
+        if (mLoading) {
+            if (totalItemCount > mPreviousTotal) {
+                mLoading = false
+                mPreviousTotal = totalItemCount
+            }
+        }
+        val visibleThreshold = 5
+        if (!mLoading && totalItemCount - visibleItemCount
+            <= firstVisibleItem + visibleThreshold
+        ) {
+            onLoadMore()
+            mLoading = true
+        }
+    }
+
+    abstract fun onLoadMore()
 }
