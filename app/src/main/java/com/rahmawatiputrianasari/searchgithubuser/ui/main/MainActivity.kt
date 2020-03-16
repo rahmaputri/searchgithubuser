@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var mAdapter: MainAdapter
     var created = true
+    var inputName: String = ""
 
     val component: MainComponent by lazy {
         DaggerMainComponent.builder()
@@ -64,14 +65,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             if (loading)
                 return@setOnClickListener
 
-            val name = etName.text.toString()
-            if (name.isEmpty()) {
+            inputName = etName.text.toString()
+            if (inputName.isEmpty()) {
                 Toast.makeText(this, "Please Insert Username", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             } else {
                 created = true
                 page = 1
-                presenter.searchUser(name, page.toString())
+                presenter.searchUser(inputName, page.toString())
             }
 
         }
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         title: String,
         desc: String
     ) {
-        if (!(this).isFinishing) { //show dialog
+        if (!(this).isFinishing) {
 
             AlertDialog.Builder(this)
                 .setTitle(title)
@@ -163,9 +164,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private fun scrollData(): EndlessOnScrollListener? {
         return object : EndlessOnScrollListener() {
             override fun onLoadMore() {
-                mAdapter.addLoadingFooter()
-                page = page + 1
-                presenter.searchUser("r", page.toString())
+                if (mAdapter.itemCount > 10) {
+                    mAdapter.addLoadingFooter()
+                    page = page + 1
+                    presenter.searchUser(inputName, page.toString())
+                }
             }
         }
     }
