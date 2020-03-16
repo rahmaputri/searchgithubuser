@@ -1,6 +1,5 @@
 package com.rahmawatiputrianasari.searchgithubuser.ui.main
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,15 +7,12 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.rahmawatiputrianasari.searchgithubuser.R
 import com.rahmawatiputrianasari.searchgithubuser.app.App
-import com.rahmawatiputrianasari.searchgithubuser.app.model.Joke
 import com.rahmawatiputrianasari.searchgithubuser.app.model.SearchResponse
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.adapter.MainAdapter
-import com.rahmawatiputrianasari.searchgithubuser.ui.main.adapter.MainAdapter2
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.DaggerMainComponent
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.MainComponent
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.di.MainModule
@@ -24,7 +20,6 @@ import com.rahmawatiputrianasari.searchgithubuser.utils.NetworkEvent
 import com.rahmawatiputrianasari.searchgithubuser.utils.NetworkState
 import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.item.*
 import javax.inject.Inject
 
 
@@ -44,7 +39,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private var loading = false
 
     private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var mAdapter: MainAdapter2
+    private lateinit var mAdapter: MainAdapter
     var created = true
 
     val component: MainComponent by lazy {
@@ -150,35 +145,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         loading = false
     }
 
-    override fun publishData(data: List<Joke>) {
-        val adapter = MainAdapter(data, object : MainAdapter.JokeListener {
-            override fun onItemClick(joke: Joke) {
-                presenter.onItemClicked(joke)
-            }
-        })
-        recyclerView.adapter = mAdapter
-    }
-
 
     override fun publishUsers(data: SearchResponse) {
         if (created) {
-            mAdapter = MainAdapter2(data.items!!, object : MainAdapter2.JokeListener {
-                override fun onItemClick(joke: Joke) {
-                }
-            })
-
-
+            mAdapter = MainAdapter(data.items!!)
             recyclerView.setLayoutManager(mLayoutManager)
             recyclerView.addOnScrollListener(scrollData()!!)
             created = false
-
             recyclerView.adapter = mAdapter
         } else {
             mAdapter.removeLoadingFooter()
             mAdapter.addAll(data.items!!)
         }
-
-
     }
 
 
