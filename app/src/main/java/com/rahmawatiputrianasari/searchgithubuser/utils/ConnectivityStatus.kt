@@ -8,7 +8,8 @@ class ConnectivityStatus {
 
         fun isConnected(context: Context): Boolean {
 
-            val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val manager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val connection = manager.activeNetworkInfo
             return connection != null && connection.isConnectedOrConnecting
         }

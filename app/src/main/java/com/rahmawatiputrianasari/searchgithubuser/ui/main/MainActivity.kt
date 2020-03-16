@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import com.rahmawatiputrianasari.searchgithubuser.R
 import com.rahmawatiputrianasari.searchgithubuser.app.App
@@ -23,6 +24,7 @@ import com.rahmawatiputrianasari.searchgithubuser.utils.NetworkEvent
 import com.rahmawatiputrianasari.searchgithubuser.utils.NetworkState
 import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.item.*
 import javax.inject.Inject
 
 
@@ -39,19 +41,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     lateinit var presenter: MainPresenter
 
     var page: Int = 1
-    private var loading = true
+    private var loading = false
 
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var mAdapter: MainAdapter2
     var created = true
-    var firstInit = false
-
-
-    private val PAGE_START = 0
-    private var isLoading = false
-    private var isLastPage = false
-    //    private val TOTAL_PAGES = 3
-    private val currentPage = PAGE_START
 
     val component: MainComponent by lazy {
         DaggerMainComponent.builder()
@@ -68,9 +62,28 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         initView()
         component.inject(this)
         presenter.bindView(this)
-//        presenter.onViewCreated()
-        presenter.searchUser("r", page.toString())
+        registerNetwork()
 
+
+        btnSearch.setOnClickListener {
+            if (loading)
+                return@setOnClickListener
+
+            val name = etName.text.toString()
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Please Insert Username", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            } else {
+                created = true
+                page = 1
+                presenter.searchUser(name, page.toString())
+            }
+
+        }
+
+    }
+
+    fun registerNetwork() {
         NetworkEvent.register(this, Consumer {
             when (it) {
                 NetworkState.NO_INTERNET -> displayErrorDialog(
@@ -96,9 +109,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 }
             }
         })
-
-        firstInit = true
-
     }
 
     fun displayErrorDialog(
@@ -125,14 +135,18 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun showLoading() {
-//        recyclerView.visibility = View.GONE
-//        progressBar.visibility = View.VISIBLE
+        if (created) {
+            recyclerView.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
+        }
         loading = true
     }
 
     override fun hideLoading() {
-//        recyclerView.visibility = View.VISIBLE
-//        progressBar.visibility = View.GONE
+        if (created) {
+            recyclerView.visibility = View.VISIBLE
+            progressBar.visibility = View.GONE
+        }
         loading = false
     }
 
@@ -150,46 +164,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         if (created) {
             mAdapter = MainAdapter2(data.items!!, object : MainAdapter2.JokeListener {
                 override fun onItemClick(joke: Joke) {
-//                presenter.onItemClicked(joke)
                 }
             })
-            Log.v("...", "total jumlah " + data.totalCount)
 
 
             recyclerView.setLayoutManager(mLayoutManager)
             recyclerView.addOnScrollListener(scrollData()!!)
-//            recyclerView.addOnScrollListener(object : PaginationScrollListener(mLayoutManager) {
-//                protected override fun loadMoreItems() {
-//                    loading = true
-//                    page += 1
-//                    // mocking network delay for API call
-//                    Handler().postDelayed(Runnable { loadNextPage() }, 1000)
-//                }
-//
-////                override val totalPageCount: Int
-////                    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-////                override val isLastPage: Boolean
-////                    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-////                override val isLoading: Boolean
-////                    get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-//
-//                override fun getTotalPageCount(): Int {
-//                    return TOTAL_PAGES
-//                }
-//
-//                fun isLastPage(): Boolean {
-//                    return isLastPage
-//                }
-//
-//                fun isLoading(): Boolean {
-//                    return isLoading
-//                }
-//
-//            })
+            created = false
 
             recyclerView.adapter = mAdapter
         } else {
-//            mAdapter.notifyDataSetChanged()
             mAdapter.removeLoadingFooter()
             mAdapter.addAll(data.items!!)
         }

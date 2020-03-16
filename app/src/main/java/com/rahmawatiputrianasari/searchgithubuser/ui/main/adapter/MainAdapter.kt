@@ -24,7 +24,8 @@ class MainAdapter(private val jokes: List<Joke>, private val listener: JokeListe
         holder.name.text = jokes[position].desc
         holder.site.text = jokes[position].site
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            holder.desc.text = Html.fromHtml(jokes[position].elementPureHtml, Html.FROM_HTML_MODE_LEGACY)
+            holder.desc.text =
+                Html.fromHtml(jokes[position].elementPureHtml, Html.FROM_HTML_MODE_LEGACY)
         } else {
             holder.desc.text = (Html.fromHtml(jokes[position].elementPureHtml))
         }

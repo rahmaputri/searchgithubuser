@@ -30,12 +30,6 @@ class MainAdapter2(private var items: ArrayList<Item>, private val listener: Jok
         var view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item, parent, false)
 
-//        when (viewType) {
-//            LOADING -> {
-//                view = LayoutInflater.from(parent.context)
-//                    .inflate(R.layout.item_progress, parent, false)
-//            }
-//        }
         return ViewHolder(view)
     }
 

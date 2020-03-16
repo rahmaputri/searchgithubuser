@@ -12,7 +12,8 @@ class NetworkInterceptor(
      * since we need to get the ConnectivityStatus
      * to check if there is internet.
      * */
-    private val context: Context) : Interceptor {
+    private val context: Context
+) : Interceptor {
     private val networkEvent: NetworkEvent = NetworkEvent
 
     override fun intercept(chain: Interceptor.Chain): Response? {
@@ -38,7 +39,7 @@ class NetworkInterceptor(
                 val response = chain.proceed(request)
                 when (response.code()) {
                     401 -> networkEvent.publish(NetworkState.UNAUTHORISED)
-
+                    500 -> networkEvent.publish(NetworkState.NO_RESPONSE)
                     503 -> networkEvent.publish(NetworkState.NO_RESPONSE)
                     403 -> networkEvent.publish(NetworkState.NO_RESPONSE)
                     404 -> networkEvent.publish(NetworkState.NO_RESPONSE)
