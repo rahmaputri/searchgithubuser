@@ -1,5 +1,7 @@
 package com.rahmawatiputrianasari.searchgithubuser.app.di
 
+import com.rahmawatiputrianasari.searchgithubuser.app.App
+import com.rahmawatiputrianasari.searchgithubuser.utils.NetworkInterceptor
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -22,7 +24,7 @@ class AppModule {
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl(SERVER_URL)
         .client(
-            OkHttpClient.Builder()
+            OkHttpClient.Builder().addInterceptor(NetworkInterceptor(App.ctx))
                 .build()
         )
         .build()

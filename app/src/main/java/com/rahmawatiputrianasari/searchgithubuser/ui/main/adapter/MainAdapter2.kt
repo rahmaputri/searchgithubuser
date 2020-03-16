@@ -1,8 +1,10 @@
 package com.rahmawatiputrianasari.searchgithubuser.ui.main.adapter
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
+import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -15,28 +17,47 @@ import kotlinx.android.synthetic.main.item.view.*
 import java.net.URL
 
 
-class MainAdapter2(private var items: List<Item>, private val listener: JokeListener) :
+class MainAdapter2(private var items: ArrayList<Item>, private val listener: JokeListener) :
     RecyclerView.Adapter<MainAdapter2.ViewHolder>() {
 
+    private val ITEM = 0
+    private val LOADING = 1
+    private val context: Context? = null
+
+    private var isLoadingAdded = false
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
+        var view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item, parent, false)
+
+//        when (viewType) {
+//            LOADING -> {
+//                view = LayoutInflater.from(parent.context)
+//                    .inflate(R.layout.item_progress, parent, false)
+//            }
+//        }
         return ViewHolder(view)
     }
 
+
+    fun getItems(): ArrayList<Item> {
+        return items
+    }
+
+    fun setItems(item: ArrayList<Item>) {
+        items = item
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        when (getItemViewType(position)) {
+            ITEM -> {
+                holder.userName.text = items[position].name
+                DownLoadImageTask(holder.userImage).execute(items[position].avatarUrl)
+            }
+            LOADING -> {
+            }
+        }
 
-        holder.userName.text = items[position].name
-        DownLoadImageTask(holder.userImage).execute(items[position].avatarUrl)
-//        holder.userImage.text = items[position].site
-//        Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            holder.desc.text = Html.fromHtml(items[position].elementPureHtml, Html.FROM_HTML_MODE_LEGACY)
-//        } else {
-//            holder.desc.text = (Html.fromHtml(items[position].elementPureHtml))
-//        }
-
-//        holder.itemView.setOnClickListener { listener.onItemClick(items[position]) }
     }
 
     private class DownLoadImageTask(imageView: ImageView) :
@@ -70,6 +91,66 @@ class MainAdapter2(private var items: List<Item>, private val listener: JokeList
     override fun getItemCount(): Int {
         return items.size
     }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == items.size - 1 && isLoadingAdded) LOADING else ITEM
+    }
+
+    fun add(mc: Item?) {
+        items.add(mc!!)
+        val handler = Handler()
+
+        val r = Runnable { notifyItemInserted(items.size - 1) }
+
+        handler.post(r)
+
+    }
+
+    fun addAll(mcList: List<Item?>) {
+        for (mc in mcList) {
+            add(mc)
+        }
+    }
+
+    fun remove(item: Item?) {
+        val position: Int = items.indexOf(item)
+        if (position > -1) {
+            items.removeAt(position)
+            notifyItemRemoved(position)
+        }
+    }
+
+    fun clear() {
+        isLoadingAdded = false
+        while (itemCount > 0) {
+            remove(getItem(0))
+        }
+    }
+
+    fun isEmpty(): Boolean {
+        return itemCount == 0
+    }
+
+
+    fun addLoadingFooter() {
+        isLoadingAdded = true
+        add(Item())
+    }
+
+    fun removeLoadingFooter() {
+        isLoadingAdded = false
+        val position: Int = items.size - 1
+        val item = getItem(position)
+        if (item != null) {
+            items.removeAt(position)
+            notifyItemRemoved(position)
+        }
+    }
+
+    fun getItem(position: Int): Item? {
+        return items.get(position)
+    }
+
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val userName = itemView.userName!!

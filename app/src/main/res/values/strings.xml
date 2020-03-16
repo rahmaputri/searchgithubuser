@@ -3,5 +3,12 @@
     <string name="main_title">Jokes</string>
     <string name="detail_title">Joke Detail</string>
     <string name="empty_data">Oops! Something went wrong</string>
+
+
+    <string name="generic_http_error_title">Error Occurred</string>
+    <string name="generic_http_error_desc">Server is not available. Try again after sometime</string>
+    <string name="generic_no_internet_desc">Oops...You do not seem to have a proper internet connection. Please try again after connecting to a valid internet connection</string>
+    <string name="generic_no_internet_title">No Internet Connection</string>
+    <string name="error_login_expired">Your session has expired. Please login again</string>
 </resources>
 

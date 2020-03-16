@@ -11,6 +11,7 @@ import com.rahmawatiputrianasari.searchgithubuser.app.model.SearchResponse
 import com.rahmawatiputrianasari.searchgithubuser.ui.main.data.MainRepo
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.toolbar.*
@@ -44,7 +45,8 @@ class MainInteractor(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError(onError)
             .doOnSuccess(onSuccess)
-            .subscribe()
+            .subscribe({ System.out.println(it) },
+                { System.out.println(it) })
 
         compositeDisposable.add(disposable)
     }
