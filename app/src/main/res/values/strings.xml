@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Search Github User</string>
+    <string name="main_title">Jokes</string>
+    <string name="detail_title">Joke Detail</string>
+    <string name="empty_data">Oops! Something went wrong</string>
 </resources>
+
